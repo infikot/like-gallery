@@ -98,6 +98,7 @@ import com.google.ai.edge.gallery.data.BottomSheetSelectorItem
 import com.google.ai.edge.gallery.data.Config
 import com.google.ai.edge.gallery.data.ConfigKeys
 import com.google.ai.edge.gallery.data.LabelConfig
+import com.google.ai.edge.gallery.data.Model
 import com.google.ai.edge.gallery.data.NumberSliderConfig
 import com.google.ai.edge.gallery.data.SegmentedButtonConfig
 import com.google.ai.edge.gallery.data.ValueType
@@ -131,6 +132,7 @@ fun ConfigDialog(
   showSystemPromptEditorTab: Boolean = false,
   defaultSystemPrompt: String = "",
   curSystemPrompt: String = "",
+  model: Model? = null,
 ) {
   val values: SnapshotStateMap<String, Any> = remember {
     mutableStateMapOf<String, Any>().apply { putAll(initialValues) }
@@ -205,7 +207,7 @@ fun ConfigDialog(
             modifier = Modifier.verticalScroll(rememberScrollState()).weight(1f, fill = false),
             verticalArrangement = Arrangement.spacedBy(16.dp),
           ) {
-            ConfigEditorsPanel(configs = configs, values = values)
+            ConfigEditorsPanel(configs = configs, values = values, model = model)
           }
         } else if (selectedTabIndex == 1) {
           OutlinedTextField(
@@ -265,7 +267,7 @@ fun ConfigDialog(
 
 /** Composable function to display a list of config editor rows. */
 @Composable
-fun ConfigEditorsPanel(configs: List<Config>, values: SnapshotStateMap<String, Any>) {
+fun ConfigEditorsPanel(configs: List<Config>, values: SnapshotStateMap<String, Any>, model: Model? = null) {
   for (config in configs) {
     when (config) {
       // Label.
@@ -280,7 +282,7 @@ fun ConfigEditorsPanel(configs: List<Config>, values: SnapshotStateMap<String, A
 
       // Boolean switch.
       is BooleanSwitchConfig -> {
-        BooleanSwitchRow(config = config, values = values)
+        BooleanSwitchRow(config = config, values = values, model = model)
       }
 
       // Segmented button.
@@ -458,7 +460,7 @@ fun NumberSliderRow(config: NumberSliderConfig, values: SnapshotStateMap<String,
  * value.
  */
 @Composable
-fun BooleanSwitchRow(config: BooleanSwitchConfig, values: SnapshotStateMap<String, Any>) {
+fun BooleanSwitchRow(config: BooleanSwitchConfig, values: SnapshotStateMap<String, Any>, model: Model? = null) {
   val switchValue =
     try {
       values[config.key.label] as Boolean
@@ -468,6 +470,14 @@ fun BooleanSwitchRow(config: BooleanSwitchConfig, values: SnapshotStateMap<Strin
   Column(modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}) {
     Text(config.key.label, style = MaterialTheme.typography.titleSmall)
     Switch(checked = switchValue, onCheckedChange = { values[config.key.label] = it })
+    if (config.key == ConfigKeys.ENABLE_THINKING && switchValue && model?.llmSupportThinking == false) {
+      Text(
+        text = "Warning: This model doesn't officially support thinking mode. It may be unstable.",
+        color = MaterialTheme.colorScheme.error,
+        style = MaterialTheme.typography.bodySmall,
+        modifier = Modifier.padding(top = 4.dp)
+      )
+    }
   }
 }
 
