@@ -149,7 +149,7 @@ data class AllowedModel(
               defaultMaxToken = llmMaxToken,
               defaultMaxContextLength = llmMaxContextLength,
               accelerators = accelerators,
-              supportThinking = true,
+              supportThinking = llmSupportThinking == true,
             )
           })
           .toMutableList()
