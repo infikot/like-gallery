@@ -38,7 +38,7 @@ const val KEY_MODEL_UNZIPPED_DIR = "KEY_MODEL_UNZIPPED_DIR"
 const val KEY_MODEL_START_UNZIPPING = "KEY_MODEL_START_UNZIPPING"
 
 // Default values for LLM models.
-const val DEFAULT_MAX_TOKEN = 1024
+const val DEFAULT_MAX_TOKEN = 32768
 const val DEFAULT_TOPK = 64
 const val DEFAULT_TOPP = 0.95f
 const val DEFAULT_TEMPERATURE = 1.0f
@@ -46,16 +46,16 @@ val DEFAULT_ACCELERATORS = listOf(Accelerator.GPU)
 val DEFAULT_VISION_ACCELERATOR = Accelerator.GPU
 
 // Max number of images allowed in a "ask image" session.
-const val MAX_IMAGE_COUNT = 10
+const val MAX_IMAGE_COUNT = 9999
 
 // Max number of skills recommended in a "agent skills" session.
-const val MAX_RECOMMENDED_SKILL_COUNT = 15
+const val MAX_RECOMMENDED_SKILL_COUNT = 150
 
 // Max number of audio clip in an "ask audio" session.
-const val MAX_AUDIO_CLIP_COUNT = 1
+const val MAX_AUDIO_CLIP_COUNT = 9999
 
 // Max audio clip duration in seconds.
-const val MAX_AUDIO_CLIP_DURATION_SEC = 30
+const val MAX_AUDIO_CLIP_DURATION_SEC = 36000
 
 // Audio-recording related consts.
 const val SAMPLE_RATE = 16000
