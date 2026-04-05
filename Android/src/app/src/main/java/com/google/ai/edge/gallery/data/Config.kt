@@ -228,17 +228,14 @@ fun createLlmChatConfigs(
   supportThinking: Boolean = false,
 ): List<Config> {
   var maxTokensConfig: Config =
-    LabelConfig(key = ConfigKeys.MAX_TOKENS, defaultValue = "$defaultMaxToken")
-  if (defaultMaxContextLength != null) {
-    maxTokensConfig =
-      NumberSliderConfig(
-        key = ConfigKeys.MAX_TOKENS,
-        sliderMin = 2000f,
-        sliderMax = defaultMaxContextLength.toFloat(),
-        defaultValue = defaultMaxToken.toFloat(),
-        valueType = ValueType.INT,
-      )
-  }
+    NumberSliderConfig(
+      key = ConfigKeys.MAX_TOKENS,
+      sliderMin = 100f,
+      sliderMax = 32768f,
+      defaultValue = defaultMaxToken.toFloat(),
+      valueType = ValueType.INT,
+    )
+
   val configs =
     listOf(
         maxTokensConfig,
@@ -271,9 +268,8 @@ fun createLlmChatConfigs(
       )
       .toMutableList()
 
-  if (supportThinking) {
-    configs.add(BooleanSwitchConfig(key = ConfigKeys.ENABLE_THINKING, defaultValue = false))
-  }
+  configs.add(BooleanSwitchConfig(key = ConfigKeys.ENABLE_THINKING, defaultValue = false))
+
   return configs
 }
 
