@@ -284,6 +284,7 @@ fun ModelPageAppBar(
       showSystemPromptEditorTab = allowEditingSystemPrompt,
       defaultSystemPrompt = task.defaultSystemPrompt,
       curSystemPrompt = curSystemPrompt,
+      model = model,
     )
   }
 }
