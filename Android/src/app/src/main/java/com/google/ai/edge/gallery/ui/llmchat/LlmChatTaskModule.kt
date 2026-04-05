@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AllInclusive
 import androidx.compose.material.icons.outlined.Forum
 import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.Mms
@@ -99,9 +100,35 @@ class LlmChatTask @Inject constructor() : CustomTask {
   @Composable
   override fun MainScreen(data: Any) {
     val myData = data as CustomTaskDataForBuiltinTask
-    LlmChatScreen(
+    var curSystemPrompt by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(task.defaultSystemPrompt) }
+    val viewModel: LlmChatViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+
+    ChatViewWrapper(
+      viewModel = viewModel,
       modelManagerViewModel = myData.modelManagerViewModel,
+      taskId = BuiltInTaskId.LLM_CHAT,
       navigateUp = myData.onNavUp,
+      allowEditingSystemPrompt = true,
+      curSystemPrompt = curSystemPrompt,
+      onSystemPromptChanged = { newPrompt ->
+        curSystemPrompt = newPrompt
+        viewModel.resetSession(
+          task = task,
+          model = myData.modelManagerViewModel.uiState.value.selectedModel,
+          systemInstruction = com.google.ai.edge.litertlm.Contents.of(newPrompt),
+          supportImage = false,
+          supportAudio = false
+        )
+      },
+      onResetSessionClickedOverride = { t, m ->
+        viewModel.resetSession(
+          task = t,
+          model = m,
+          systemInstruction = com.google.ai.edge.litertlm.Contents.of(curSystemPrompt),
+          supportImage = false,
+          supportAudio = false
+        )
+      },
       emptyStateComposable = {
         Box(modifier = Modifier.fillMaxSize()) {
           Column(
@@ -181,9 +208,56 @@ class LlmAskImageTask @Inject constructor() : CustomTask {
   @Composable
   override fun MainScreen(data: Any) {
     val myData = data as CustomTaskDataForBuiltinTask
-    LlmAskImageScreen(
+    var curSystemPrompt by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(task.defaultSystemPrompt) }
+    val viewModel: LlmAskImageViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+
+    ChatViewWrapper(
+      viewModel = viewModel,
       modelManagerViewModel = myData.modelManagerViewModel,
+      taskId = BuiltInTaskId.LLM_ASK_IMAGE,
       navigateUp = myData.onNavUp,
+      showImagePicker = true,
+      showAudioPicker = false,
+      allowEditingSystemPrompt = true,
+      curSystemPrompt = curSystemPrompt,
+      onSystemPromptChanged = { newPrompt ->
+        curSystemPrompt = newPrompt
+        viewModel.resetSession(
+          task = task,
+          model = myData.modelManagerViewModel.uiState.value.selectedModel,
+          systemInstruction = com.google.ai.edge.litertlm.Contents.of(newPrompt),
+          supportImage = true,
+          supportAudio = false
+        )
+      },
+      onResetSessionClickedOverride = { t, m ->
+        viewModel.resetSession(
+          task = t,
+          model = m,
+          systemInstruction = com.google.ai.edge.litertlm.Contents.of(curSystemPrompt),
+          supportImage = true,
+          supportAudio = false
+        )
+      },
+      emptyStateComposable = {
+        Box(modifier = Modifier.fillMaxSize()) {
+          Column(
+            modifier =
+              Modifier.align(Alignment.Center).padding(horizontal = 48.dp).padding(bottom = 48.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+          ) {
+            Text(stringResource(R.string.askimage_emptystate_title), style = emptyStateTitle)
+            val contentRes = R.string.askimage_emptystate_content
+            Text(
+              stringResource(contentRes),
+              style = emptyStateContent,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              textAlign = TextAlign.Center,
+            )
+          }
+        }
+      },
     )
   }
 }
@@ -246,9 +320,55 @@ class LlmAskAudioTask @Inject constructor() : CustomTask {
   @Composable
   override fun MainScreen(data: Any) {
     val myData = data as CustomTaskDataForBuiltinTask
-    LlmAskAudioScreen(
+    var curSystemPrompt by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(task.defaultSystemPrompt) }
+    val viewModel: LlmAskAudioViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+
+    ChatViewWrapper(
+      viewModel = viewModel,
       modelManagerViewModel = myData.modelManagerViewModel,
+      taskId = BuiltInTaskId.LLM_ASK_AUDIO,
       navigateUp = myData.onNavUp,
+      showImagePicker = false,
+      showAudioPicker = true,
+      allowEditingSystemPrompt = true,
+      curSystemPrompt = curSystemPrompt,
+      onSystemPromptChanged = { newPrompt ->
+        curSystemPrompt = newPrompt
+        viewModel.resetSession(
+          task = task,
+          model = myData.modelManagerViewModel.uiState.value.selectedModel,
+          systemInstruction = com.google.ai.edge.litertlm.Contents.of(newPrompt),
+          supportImage = false,
+          supportAudio = true
+        )
+      },
+      onResetSessionClickedOverride = { t, m ->
+        viewModel.resetSession(
+          task = t,
+          model = m,
+          systemInstruction = com.google.ai.edge.litertlm.Contents.of(curSystemPrompt),
+          supportImage = false,
+          supportAudio = true
+        )
+      },
+      emptyStateComposable = {
+        Box(modifier = Modifier.fillMaxSize()) {
+          Column(
+            modifier =
+              Modifier.align(Alignment.Center).padding(horizontal = 48.dp).padding(bottom = 48.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+          ) {
+            Text(stringResource(R.string.askaudio_emptystate_title), style = emptyStateTitle)
+            Text(
+              stringResource(R.string.askaudio_emptystate_content),
+              style = emptyStateContent,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              textAlign = TextAlign.Center,
+            )
+          }
+        }
+      },
     )
   }
 }
@@ -260,5 +380,116 @@ internal object LlmAskAudioModule {
   @IntoSet
   fun provideTask(): CustomTask {
     return LlmAskAudioTask()
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// All in One.
+
+class LlmAllInOneTask @Inject constructor() : CustomTask {
+  override val task: Task =
+    Task(
+      id = BuiltInTaskId.LLM_ALL_IN_ONE,
+      label = "All in One",
+      category = Category.LLM,
+      icon = Icons.Outlined.AllInclusive,
+      models = mutableListOf(),
+      description = "Chat with text, images, and audio support enabled simultaneously.",
+      shortDescription = "Multi-modality support",
+      docUrl = "https://github.com/google-ai-edge/LiteRT-LM/blob/main/kotlin/README.md",
+      sourceCodeUrl =
+        "https://github.com/google-ai-edge/gallery/blob/main/Android/src/app/src/main/java/com/google/ai/edge/gallery/ui/llmchat/LlmChatModelHelper.kt",
+      textInputPlaceHolderRes = R.string.text_input_placeholder_llm_chat,
+    )
+
+  override fun initializeModelFn(
+    context: Context,
+    coroutineScope: CoroutineScope,
+    model: Model,
+    onDone: (String) -> Unit,
+  ) {
+    // Enable everything for All in One
+    model.runtimeHelper.initialize(
+      context = context,
+      model = model,
+      supportImage = true,
+      supportAudio = true,
+      onDone = onDone,
+      coroutineScope = coroutineScope,
+    )
+  }
+
+  override fun cleanUpModelFn(
+    context: Context,
+    coroutineScope: CoroutineScope,
+    model: Model,
+    onDone: () -> Unit,
+  ) {
+    model.runtimeHelper.cleanUp(model = model, onDone = onDone)
+  }
+
+  @Composable
+  override fun MainScreen(data: Any) {
+    val myData = data as CustomTaskDataForBuiltinTask
+    var curSystemPrompt by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(task.defaultSystemPrompt) }
+    val viewModel: LlmChatViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+
+    ChatViewWrapper(
+      viewModel = viewModel,
+      modelManagerViewModel = myData.modelManagerViewModel,
+      taskId = BuiltInTaskId.LLM_ALL_IN_ONE,
+      navigateUp = myData.onNavUp,
+      showImagePicker = true,
+      showAudioPicker = true,
+      allowEditingSystemPrompt = true,
+      curSystemPrompt = curSystemPrompt,
+      onSystemPromptChanged = { newPrompt ->
+        curSystemPrompt = newPrompt
+        viewModel.resetSession(
+          task = task,
+          model = myData.modelManagerViewModel.uiState.value.selectedModel,
+          systemInstruction = com.google.ai.edge.litertlm.Contents.of(newPrompt),
+          supportImage = true,
+          supportAudio = true
+        )
+      },
+      onResetSessionClickedOverride = { t, m ->
+        viewModel.resetSession(
+          task = t,
+          model = m,
+          systemInstruction = com.google.ai.edge.litertlm.Contents.of(curSystemPrompt),
+          supportImage = true,
+          supportAudio = true
+        )
+      },
+      emptyStateComposable = {
+        Box(modifier = Modifier.fillMaxSize()) {
+          Column(
+            modifier =
+              Modifier.align(Alignment.Center).padding(horizontal = 48.dp).padding(bottom = 48.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+          ) {
+            Text("All in One", style = emptyStateTitle)
+            Text(
+              "Chat with text, images, and audio.",
+              style = emptyStateContent,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              textAlign = TextAlign.Center,
+            )
+          }
+        }
+      },
+    )
+  }
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+internal object LlmAllInOneModule {
+  @Provides
+  @IntoSet
+  fun provideTask(): CustomTask {
+    return LlmAllInOneTask()
   }
 }
