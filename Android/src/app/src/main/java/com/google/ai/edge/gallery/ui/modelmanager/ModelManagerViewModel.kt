@@ -166,6 +166,7 @@ private val RESET_CONVERSATION_TURN_COUNT_CONFIG =
 
 private val PREDEFINED_LLM_TASK_ORDER =
   listOf(
+    BuiltInTaskId.LLM_ALL_IN_ONE,
     BuiltInTaskId.LLM_ASK_IMAGE,
     BuiltInTaskId.LLM_ASK_AUDIO,
     BuiltInTaskId.LLM_CHAT,
@@ -572,6 +573,7 @@ constructor(
         BuiltInTaskId.LLM_TINY_GARDEN,
         BuiltInTaskId.LLM_MOBILE_ACTIONS,
         BuiltInTaskId.LLM_AGENT_CHAT,
+        BuiltInTaskId.LLM_ALL_IN_ONE,
       )
     for (task in getTasksByIds(ids = setOfTasks)) {
       // Remove duplicated imported model if existed.
@@ -1043,6 +1045,7 @@ constructor(
       if (model.llmSupportMobileActions) {
         tasks.get(key = BuiltInTaskId.LLM_MOBILE_ACTIONS)?.models?.add(model)
       }
+      tasks.get(key = BuiltInTaskId.LLM_ALL_IN_ONE)?.models?.add(model)
 
       // Update status.
       modelDownloadStatus[model.name] =
